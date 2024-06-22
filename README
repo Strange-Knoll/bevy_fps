@@ -1,0 +1,12 @@
+# Bevy First Person Shooter Controller
+This plugin is a blatant copy of the character controller example in the bevy_rapire3d examples repo. You can find this example here: [(github.com)](https://github.com/dimforge/bevy_rapier/blob/master/bevy_rapier3d/examples/character_controller3.rs)
+
+This repo turns the basic example into a simple to use plugin. you just need to do the following setup:
+```
+App.new()
+	//add rapier boilerplate
+	.add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
+	.add_plugins(RapierDebugRenderPlugin::default())
+	//add our plugin
+	.add_plugins(FpsPlugin::default())
+```
