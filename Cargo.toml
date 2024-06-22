@@ -1,5 +1,5 @@
 [package]
-name = "bevy_fps_controller"
+name = "bevy_first_person_shooter"
 version = "0.1.0"
 edition = "2021"
 description = "A fist person shooter plugin for bevy"
