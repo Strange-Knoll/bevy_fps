@@ -511,7 +511,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy_first_person_shooter"
+name = "bevy_fps"
 version = "0.1.0"
 dependencies = [
  "bevy",
