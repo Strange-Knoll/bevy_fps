@@ -2,6 +2,12 @@
 name = "bevy_fps_controller"
 version = "0.1.0"
 edition = "2021"
+description = "A fist person shooter plugin for bevy"
+license = "MIT or Apachie-2.0"
+homepage = "https://github.com/Strange-Knoll/bevy_fps_controller"
+repository = "https://github.com/Strange-Knoll/bevy_fps_controller"
+keywords = ["gamedev", "bevy", "rapier"]
+categories = ["game-development"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
