@@ -21,7 +21,8 @@ struct JumpSpeed (f32);
 #[derive(Default, Resource, Deref, DerefMut)]
 struct Gravity(f32);
 
-pub struct FpsPlugin{
+#[derive(Clone, Resource)]
+pub struct FpsSettings{
     mouse_sensitivity: f32,
     ground_timer: f32,
     movement_speed: f32,
@@ -29,9 +30,9 @@ pub struct FpsPlugin{
     gravity: f32
 }
 
-impl Default for FpsPlugin{
+impl Default for FpsSettings{
     fn default() -> Self {
-        FpsPlugin{
+        FpsSettings{
             gravity: -9.81,
             ground_timer: 0.5,
             jump_speed: 8.0,
@@ -41,17 +42,25 @@ impl Default for FpsPlugin{
     }
 }
 
+pub struct FpsPlugin{
+    settings: FpsSettings
+}
+
+impl Default for FpsPlugin{
+    fn default() -> Self {
+        FpsPlugin{
+            settings:FpsSettings::default()
+        }
+    }
+}
+
 impl Plugin for FpsPlugin{
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, setup)
-        .insert_resource(Gravity(self.gravity.clone()))
-        .insert_resource(GroundTimer(self.ground_timer.clone()))
-        .insert_resource(JumpSpeed(self.jump_speed.clone()))
-        .insert_resource(MouseSensitivity(self.mouse_sensitivity.clone()))
-        .insert_resource(MovementSpeed(self.movement_speed.clone()))
+        .insert_resource(self.settings.clone())
         .init_resource::<MovementInput>()
         .init_resource::<LookInput>()
-        .add_systems(Update, (
+        .add_systems(FixedUpdate, (
             handle_input,
             player_movement,
             player_look
@@ -77,7 +86,7 @@ impl Default for FpsBundle{
     fn default() -> Self {
         FpsBundle{ 
             fps:Fps(),
-            transform:TransformBundle::from(Transform::from_xyz(0.0, 2.0, 0.0)),
+            transform:TransformBundle::from(Transform::from_xyz(0.0, 10.0, 0.0)),
             kinematic: KinematicCharacterController::default(),
             rigidbody:RigidBody::KinematicPositionBased,
             collider:Collider::capsule_y(1.0, 0.5)
@@ -109,7 +118,7 @@ fn handle_input(
     mut movement: ResMut<MovementInput>,
     mut look: ResMut<LookInput>,
     mut mouse_event: EventReader<MouseMotion>,
-    mouse_sensitivity: Res<MouseSensitivity>
+    settings: Res<FpsSettings>
 ){
     if keyboard.pressed(KeyCode::KeyW){
         movement.z -= 1.0;
@@ -135,8 +144,8 @@ fn handle_input(
     }
 
     for event in mouse_event.read() {
-        look.x -= event.delta.x * **mouse_sensitivity;
-        look.y -= event.delta.y * **mouse_sensitivity;
+        look.x -= event.delta.x * settings.mouse_sensitivity;
+        look.y -= event.delta.y * settings.mouse_sensitivity;
         look.y = look.y.clamp(-89.9, 89.9);
     }
 }
@@ -152,10 +161,7 @@ fn player_movement(
     )>,
     mut vertical_movement: Local<f32>,
     mut grounded_timer: Local<f32>,
-    movement_speed:Res<MovementSpeed>,
-    jump_speed: Res<JumpSpeed>,
-    res_ground_timer: Res<GroundTimer>,
-    gravity: Res<Gravity>
+    settings: Res<FpsSettings>
 
 ){
     let Ok((_, transform, mut controller, output)) = player.get_single_mut() else {
@@ -163,13 +169,13 @@ fn player_movement(
     };
     let delta_time = time.delta_seconds();
     // Retrieve input
-    let mut movement = Vec3::new(input.x, 0.0, input.z) * **movement_speed;
-    let jump_speed = input.y * **jump_speed;
+    let mut movement = Vec3::new(input.x, 0.0, input.z) * settings.movement_speed;
+    let jump_speed = input.y * settings.jump_speed;
     // Clear input
     **input = Vec3::ZERO;
     // Check physics ground check
     if output.map(|o| o.grounded).unwrap_or(false) {
-        *grounded_timer = **res_ground_timer;
+        *grounded_timer = settings.ground_timer;
         *vertical_movement = 0.0;
     }
     // If we are grounded we can jump
@@ -182,7 +188,7 @@ fn player_movement(
         }
     }
     movement.y = *vertical_movement;
-    *vertical_movement += **gravity * delta_time * controller.custom_mass.unwrap_or(1.0);
+    *vertical_movement += settings.gravity * delta_time * controller.custom_mass.unwrap_or(1.0);
     controller.translation = Some(transform.rotation * (movement * delta_time));
 
 }
