@@ -10,24 +10,14 @@
 use bevy::{input::mouse::MouseMotion, prelude::*};
 use bevy_rapier3d::{control::{KinematicCharacterController, KinematicCharacterControllerOutput}, dynamics::RigidBody, geometry::Collider };
 
-#[derive(Default, Resource, Deref, DerefMut)]
-struct MouseSensitivity(f32);
-#[derive(Default, Resource, Deref, DerefMut)]
-struct GroundTimer(f32);
-#[derive(Default, Resource, Deref, DerefMut)]
-struct MovementSpeed(f32);
-#[derive(Default, Resource, Deref, DerefMut)]
-struct JumpSpeed (f32);
-#[derive(Default, Resource, Deref, DerefMut)]
-struct Gravity(f32);
-
 #[derive(Clone, Resource)]
 pub struct FpsSettings{
-    mouse_sensitivity: f32,
-    ground_timer: f32,
-    movement_speed: f32,
-    jump_speed: f32,
-    gravity: f32
+    pub mouse_sensitivity: f32,
+    pub ground_timer: f32,
+    pub movement_speed: f32,
+    pub jump_speed: f32,
+    pub gravity: f32,
+    pub transform: Transform
 }
 
 impl Default for FpsSettings{
@@ -37,13 +27,14 @@ impl Default for FpsSettings{
             ground_timer: 0.5,
             jump_speed: 8.0,
             mouse_sensitivity: 0.3,
-            movement_speed: 8.0
+            movement_speed: 8.0,
+            transform: Transform::from_xyz(0.0, 10.0, 0.0)
         }
     }
 }
 
 pub struct FpsPlugin{
-    settings: FpsSettings
+    pub settings: FpsSettings
 }
 
 impl Default for FpsPlugin{
@@ -56,10 +47,11 @@ impl Default for FpsPlugin{
 
 impl Plugin for FpsPlugin{
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, setup)
+        app
         .insert_resource(self.settings.clone())
         .init_resource::<MovementInput>()
         .init_resource::<LookInput>()
+        .add_systems(Startup, setup)
         .add_systems(FixedUpdate, (
             handle_input,
             player_movement,
@@ -96,8 +88,11 @@ impl Default for FpsBundle{
 
 
 //  --------FUNCTIONS--------  //
-fn setup(mut commands: Commands){
-    commands.spawn(FpsBundle::default()).with_children(|b|{
+fn setup(mut commands: Commands, settings: Res<FpsSettings>){
+    commands.spawn(FpsBundle{
+        transform: TransformBundle::from(settings.transform),
+        ..Default::default()
+    }).with_children(|b|{
         b.spawn(Camera3dBundle {
             transform: Transform::from_xyz(0.0, 2.0, 0.0),
             ..Default::default()

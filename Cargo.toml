@@ -12,5 +12,5 @@ categories = ["game-development"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = "0.13.2"
-bevy_rapier3d = { version = "0.26.0", features = ["simd-stable"] }
+bevy = "0.14.0"
+bevy_rapier3d = { version = "0.27.0", features = ["simd-stable"] }

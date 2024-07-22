@@ -10,3 +10,20 @@ App.new()
 	//add our plugin
 	.add_plugins(FpsPlugin::default())
 ```
+To edit the setting of the fps plugin we use the FpsSettings Object
+```
+let fps_settings = bevy_fps::FpsSettings{
+    gravity: -9.81,
+    ground_timer: 0.5,
+    jump_speed: 8.0,
+    mouse_sensitivity: 0.3,
+    movement_speed: 8.0,
+	transform: Transform::from_xyz(0.0, 10.0, 0.0)
+}
+
+App::new()
+	.add_plugins(FpsPlugin{
+        settings: fps_settings
+    })
+...
+```
